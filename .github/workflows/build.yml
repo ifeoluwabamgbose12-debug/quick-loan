@@ -1,0 +1,39 @@
+name: Build Quick-Loan APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create Cordova App
+        run: |
+          cordova create loan-app com.quickloan.app "Quick Loan"
+          cp index.html loan-app/www/
+          cd loan-app
+          cordova platform add android
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: quick-loan-apk
+          path: loan-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
